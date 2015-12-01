@@ -28,10 +28,10 @@ We get more tech support questions for this challenge than any of the other ones
 package set_one
 
 import (
-	"fmt"
+	"bytes"
+	"encoding/base64"
 	"io/ioutil"
 	"log"
-	"sort"
 )
 
 func check(e error) {
@@ -72,13 +72,6 @@ func data_avg_distance(data [][]byte) float64 {
 	return float64(distance) / float64(tot)
 }
 
-func min(a, b int) int {
-	if a <= b {
-		return a
-	}
-	return b
-}
-
 func chunk_data(data []byte, chunksize int) [][]byte {
 	chunks := make([][]byte, 0)
 	for j := 0; j < len(data); j += chunksize {
@@ -101,28 +94,38 @@ func transpose(data [][]byte) [][]byte {
 	return trans
 }
 
-type KeySize struct {
-	size     int
-	distance float64
-}
-
-func (k KeySize) String() string { return fmt.Sprintf("%d: %.2f", k.size, k.distance) }
-
-type ByDistance []KeySize
-
-func (a ByDistance) Len() int           { return len(a) }
-func (a ByDistance) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a ByDistance) Less(i, j int) bool { return a[i].distance < a[j].distance }
-
-func GetKeySize(filename string, n int) []KeySize {
+func B64File(filename string) []byte {
 	data, err := ioutil.ReadFile(filename)
 	check(err)
-	distances := make([]KeySize, 0)
-	for size := 2; size < 40; size++ {
-		distances = append(distances,
-			KeySize{size, data_avg_distance(chunk_data(data, size)) / float64(size)})
-	}
-	sort.Sort(ByDistance(distances))
+	bytes, err := base64.StdEncoding.DecodeString(string(data))
+	check(err)
+	return bytes
+}
 
-	return distances[:n]
+func GetKeySize(bytes []byte) int {
+	best_distance, best_key := float64(8), 0
+	for size := 2; size < 40; size++ {
+		distance := data_avg_distance(chunk_data(bytes, size)) / float64(size)
+		if distance < best_distance {
+			best_distance = distance
+			best_key = size
+		}
+	}
+	return best_key
+}
+
+func BreakRepeatingKeyXor(encoded []byte) string {
+	scorer := EnglishScorer()
+	key_size := GetKeySize(encoded)
+	blocks := transpose(chunk_data(encoded, key_size))
+	decrypted := make([][]byte, len(blocks))
+	for idx, block := range blocks {
+		decoded, _ := BreakXOR(scorer, block)
+		decrypted[idx] = []byte(decoded)
+	}
+	var buffer bytes.Buffer
+	for _, x := range transpose(decrypted) {
+		buffer.Write(x)
+	}
+	return buffer.String()
 }

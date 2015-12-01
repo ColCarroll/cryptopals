@@ -43,3 +43,11 @@ func TestHamming(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestGetKeySize(t *testing.T) {
+	calculated := GetKeySize(B64File("data/6.txt"))
+	expected := 29
+	if calculated != expected {
+		t.Fail()
+	}
+}

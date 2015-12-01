@@ -20,11 +20,16 @@ import (
 
 const Encoded string = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"
 
-func SingleByteXOR(hex_str string, b byte) []byte {
-	bytes, _ := hex.DecodeString(hex_str)
-	decoded := make([]byte, len(bytes))
-	for j := 0; j < len(bytes); j++ {
-		decoded[j] = bytes[j] ^ b
+func HexToBytes(hex_string string) []byte {
+	encoded, err := hex.DecodeString(Encoded)
+	check(err)
+	return encoded
+}
+
+func SingleByteXOR(encoded []byte, b byte) []byte {
+	decoded := make([]byte, len(encoded))
+	for j := 0; j < len(encoded); j++ {
+		decoded[j] = encoded[j] ^ b
 	}
 	return decoded
 }
@@ -43,8 +48,8 @@ func ByteFrequencies(data []byte) map[byte]float64 {
 	return percents
 }
 
-func DocumentFrequencies(filename string) map[byte]float64 {
-	data, err := ioutil.ReadFile(filename)
+func EnglishScorer() map[byte]float64 {
+	data, err := ioutil.ReadFile("set_one/data/idleness.txt")
 	if err != nil {
 		panic(err)
 	}
@@ -59,7 +64,7 @@ func CosineSimilarity(map_one, map_two map[byte]float64) float64 {
 	return tot
 }
 
-func BreakXOR(base_freq map[byte]float64, encoded string) (string, float64) {
+func BreakXOR(base_freq map[byte]float64, encoded []byte) (string, float64) {
 	best_similarity := float64(0)
 	message := ""
 	for b := 0; b < 128; b++ {
@@ -74,7 +79,7 @@ func BreakXOR(base_freq map[byte]float64, encoded string) (string, float64) {
 }
 
 func SolveThree() string {
-	doc_freq := DocumentFrequencies("set_one/data/idleness.txt")
-	message, _ := BreakXOR(doc_freq, Encoded)
+	doc_freq := EnglishScorer()
+	message, _ := BreakXOR(doc_freq, HexToBytes(Encoded))
 	return message
 }

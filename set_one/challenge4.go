@@ -14,7 +14,7 @@ import (
 )
 
 func SolveFour() string {
-	base_freq := DocumentFrequencies("set_one/data/idleness.txt")
+	base_freq := EnglishScorer()
 	best_score := float64(0)
 	best_message := ""
 	file, err := os.Open("set_one/data/4.txt")
@@ -24,7 +24,7 @@ func SolveFour() string {
 	defer file.Close()
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		line := scanner.Text()
+		line := HexToBytes(scanner.Text())
 		message, score := BreakXOR(base_freq, line)
 		if score > best_score {
 			best_score = score
