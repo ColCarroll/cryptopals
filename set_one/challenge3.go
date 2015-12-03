@@ -21,7 +21,7 @@ import (
 const Encoded string = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"
 
 func HexToBytes(hex_string string) []byte {
-	encoded, err := hex.DecodeString(Encoded)
+	encoded, err := hex.DecodeString(hex_string)
 	check(err)
 	return encoded
 }
@@ -49,10 +49,8 @@ func ByteFrequencies(data []byte) map[byte]float64 {
 }
 
 func EnglishScorer() map[byte]float64 {
-	data, err := ioutil.ReadFile("set_one/data/idleness.txt")
-	if err != nil {
-		panic(err)
-	}
+	data, err := ioutil.ReadFile("data/idleness.txt")
+	check(err)
 	return ByteFrequencies(data)
 }
 

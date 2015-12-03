@@ -18,9 +18,7 @@ import (
 )
 
 func HexToBase64(hex_string string) string {
-	if data, err := hex.DecodeString(hex_string); err != nil {
-		panic(err)
-	} else {
-		return base64.StdEncoding.EncodeToString(data)
-	}
+	data, err := hex.DecodeString(hex_string)
+	check(err)
+	return base64.StdEncoding.EncodeToString(data)
 }

@@ -8,31 +8,28 @@ Find it.
 package set_one
 
 import (
-	"bufio"
-	"log"
-	"os"
+	"io/ioutil"
+	"strings"
 )
 
-func SolveFour() string {
+func ReadLines(filename string) []string {
+	content, err := ioutil.ReadFile(filename)
+	check(err)
+	lines := strings.Split(string(content), "\n")
+	return lines
+}
+
+func FindXORLine(filename string) string {
 	base_freq := EnglishScorer()
 	best_score := float64(0)
 	best_message := ""
-	file, err := os.Open("set_one/data/4.txt")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := HexToBytes(scanner.Text())
+	for _, hex_line := range ReadLines(filename) {
+		line := HexToBytes(hex_line)
 		message, score := BreakXOR(base_freq, line)
 		if score > best_score {
 			best_score = score
 			best_message = message
 		}
-	}
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
 	}
 	return best_message
 }

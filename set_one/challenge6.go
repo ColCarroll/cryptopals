@@ -72,10 +72,17 @@ func data_avg_distance(data [][]byte) float64 {
 	return float64(distance) / float64(tot)
 }
 
+func min(a, b int) int {
+	if a <= b {
+		return a
+	}
+	return b
+}
+
 func chunk_data(data []byte, chunksize int) [][]byte {
 	chunks := make([][]byte, 0)
 	for j := 0; j < len(data); j += chunksize {
-		chunks = append(chunks, data[j:j+chunksize])
+		chunks = append(chunks, data[j:min(len(data), j+chunksize)])
 	}
 	return chunks
 }
